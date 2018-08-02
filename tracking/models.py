@@ -67,7 +67,7 @@ class Visitor(models.Model):
     class Meta(object):
         ordering = ('-start_time',)
         permissions = (
-            ('view_visitor', 'Can view visitor'),
+            ('tracking_view_visitor', 'Can view visitor for django-tracking2'),
         )
 
 
