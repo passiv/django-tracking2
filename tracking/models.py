@@ -77,11 +77,11 @@ class Pageview(models.Model):
         related_name='pageviews',
         on_delete=models.CASCADE,
     )
-    url = models.TextField(null=False, editable=False)
+    url = models.TextField(null=False, editable=False, db_index=True)
     referer = models.TextField(null=True, editable=False)
     query_string = models.TextField(null=True, editable=False)
-    method = models.CharField(max_length=20, null=True)
-    view_time = models.DateTimeField()
+    method = models.CharField(max_length=20, null=True, db_index=True)
+    view_time = models.DateTimeField(db_index=True)
 
     objects = PageviewManager()
 
