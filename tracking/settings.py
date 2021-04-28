@@ -20,3 +20,5 @@ if hasattr(settings, 'TRACKING_USE_GEOIP'):
 TRACK_REFERER = getattr(settings, 'TRACK_REFERER', False)
 
 TRACK_QUERY_STRING = getattr(settings, 'TRACK_QUERY_STRING', False)
+
+TRACK_CACHE_ON_POSTSAVE = getattr(settings, 'TRACK_CACHE_ON_POSTSAVE', True)
