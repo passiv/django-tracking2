@@ -6,6 +6,7 @@ import django
 from django.db import IntegrityError, transaction
 from django.utils import timezone
 from django.utils.encoding import smart_str
+
 try:
     from django.utils.deprecation import MiddlewareMixin
 except ImportError:
@@ -32,9 +33,12 @@ track_ignore_user_agents = [
 log = logging.getLogger(__file__)
 
 if django.VERSION < (1, 10):
+
     def is_anonymous(user):
         return user.is_anonymous()
+
 else:
+
     def is_anonymous(user):
         return user.is_anonymous
 
@@ -42,14 +46,15 @@ else:
 class VisitorTrackingMiddleware(MiddlewareMixin):
     def _should_track(self, user, request, response):
         # Session framework not installed, nothing to see here..
-        if not hasattr(request, 'session'):
-            msg = ('VisitorTrackingMiddleware installed without'
-                   'SessionMiddleware')
+        if not hasattr(request, "session"):
+            msg = "VisitorTrackingMiddleware installed without" "SessionMiddleware"
             warnings.warn(msg, RuntimeWarning)
             return False
 
         # Do not track AJAX requests
-        if request.is_ajax() and not TRACK_AJAX_REQUESTS:
+        if (
+            request.META.get("HTTP_X_REQUESTED_WITH") == "XMLHttpRequest"
+        ) and not TRACK_AJAX_REQUESTS:
             return False
 
         # Do not track if HTTP HttpResponse status_code blacklisted
@@ -61,13 +66,13 @@ class VisitorTrackingMiddleware(MiddlewareMixin):
             return False
 
         # Do not track ignored urls
-        path = request.path_info.lstrip('/')
+        path = request.path_info.lstrip("/")
         for url in track_ignore_urls:
             if url.match(path):
                 return False
 
         # Do not track ignored user agents
-        user_agent = request.headers.get('User-Agent', '')
+        user_agent = request.headers.get("User-Agent", "")
         for user_agent_pattern in track_ignore_user_agents:
             if user_agent_pattern.match(user_agent):
                 return False
@@ -99,10 +104,11 @@ class VisitorTrackingMiddleware(MiddlewareMixin):
         visitor.expiry_time = request.session.get_expiry_date()
 
         # grab the latest User-Agent and store it
-        user_agent = request.headers.get('User-Agent', None)
+        user_agent = request.headers.get("User-Agent", None)
         if user_agent:
             visitor.user_agent = smart_str(
-                user_agent, encoding='latin-1', errors='ignore')
+                user_agent, encoding="latin-1", errors="ignore"
+            )
 
         time_on_site = 0
         if visitor.start_time:
@@ -127,22 +133,26 @@ class VisitorTrackingMiddleware(MiddlewareMixin):
         query_string = None
 
         if TRACK_REFERER:
-            referer = request.headers.get('Referer', None)
+            referer = request.headers.get("Referer", None)
 
         if TRACK_QUERY_STRING:
-            query_string = request.META.get('QUERY_STRING')
+            query_string = request.META.get("QUERY_STRING")
 
         pageview = Pageview(
-            visitor=visitor, url=request.path, view_time=view_time,
-            method=request.method, referer=referer,
-            query_string=query_string)
+            visitor=visitor,
+            url=request.path,
+            view_time=view_time,
+            method=request.method,
+            referer=referer,
+            query_string=query_string,
+        )
         pageview.save()
 
     def process_response(self, request, response):
         # If dealing with a non-authenticated user, we still should track the
         # session since if authentication happens, the `session_key` carries
         # over, thus having a more accurate start time of session
-        user = getattr(request, 'user', None)
+        user = getattr(request, "user", None)
         if user and is_anonymous(user):
             # set AnonymousUsers to None for simplicity
             user = None
