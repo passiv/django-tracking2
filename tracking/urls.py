@@ -1,7 +1,7 @@
-from django.conf.urls import url
+from django.urls import path
 
 from tracking.views import dashboard
 
 urlpatterns = [
-    url(r'^$', dashboard, name='tracking-dashboard'),
+    path('', dashboard, name='tracking-dashboard'),
 ]

@@ -5,7 +5,7 @@ import warnings
 import django
 from django.db import IntegrityError, transaction
 from django.utils import timezone
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 try:
     from django.utils.deprecation import MiddlewareMixin
 except ImportError:
@@ -67,7 +67,7 @@ class VisitorTrackingMiddleware(MiddlewareMixin):
                 return False
 
         # Do not track ignored user agents
-        user_agent = request.META.get('HTTP_USER_AGENT', '')
+        user_agent = request.headers.get('User-Agent', '')
         for user_agent_pattern in track_ignore_user_agents:
             if user_agent_pattern.match(user_agent):
                 return False
@@ -99,9 +99,9 @@ class VisitorTrackingMiddleware(MiddlewareMixin):
         visitor.expiry_time = request.session.get_expiry_date()
 
         # grab the latest User-Agent and store it
-        user_agent = request.META.get('HTTP_USER_AGENT', None)
+        user_agent = request.headers.get('User-Agent', None)
         if user_agent:
-            visitor.user_agent = smart_text(
+            visitor.user_agent = smart_str(
                 user_agent, encoding='latin-1', errors='ignore')
 
         time_on_site = 0
@@ -127,7 +127,7 @@ class VisitorTrackingMiddleware(MiddlewareMixin):
         query_string = None
 
         if TRACK_REFERER:
-            referer = request.META.get('HTTP_REFERER', None)
+            referer = request.headers.get('Referer', None)
 
         if TRACK_QUERY_STRING:
             query_string = request.META.get('QUERY_STRING')
